@@ -53,6 +53,16 @@ If you don't want to use your mic, point it at a local audio file:
 
 Supported formats: anything `ffmpeg` can decode (mp3, wav, m4a, ogg, flac, etc.).
 
+## Test with a YouTube URL
+
+Pass any public YouTube URL to analyze it without downloading:
+
+```bash
+.venv/bin/python main.py --source youtube --url "https://www.youtube.com/watch?v=..."
+```
+
+Audio streams in real time — output appears chunk by chunk as it plays through.
+
 ## Troubleshooting
 
 **No output at all** — the audio may be clean. Try speaking more clearly, or lower the Whisper model size check (`tiny` sometimes misses quieter speech — try `base` in `config.yaml`).

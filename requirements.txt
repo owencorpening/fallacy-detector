@@ -3,5 +3,6 @@ faster-whisper
 sounddevice
 numpy
 pyyaml
+av
 yt-dlp
 pytest

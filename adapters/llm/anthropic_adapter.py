@@ -17,4 +17,4 @@ class AnthropicAdapter(LLMAdapter):
             messages=[{"role": "user", "content": prompt}],
         )
         raw = message.content[0].text
-        return parse_response(raw)
+        return parse_response(raw, transcript)

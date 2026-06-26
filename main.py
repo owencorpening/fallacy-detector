@@ -51,6 +51,12 @@ def build_llm(cfg: dict):
             api_key=resolve_env(cfg["api_key"]),
             model=cfg.get("model", "gpt-4o-mini"),
         )
+    elif provider == "ollama":
+        from adapters.llm.ollama_adapter import OllamaAdapter
+        return OllamaAdapter(
+            model=cfg.get("model", "llama3.2"),
+            base_url=cfg.get("base_url", "http://localhost:11434"),
+        )
     else:
         print(f"Unknown LLM provider: {provider}", file=sys.stderr)
         sys.exit(1)

@@ -28,16 +28,19 @@ If you detect a fallacy, respond with a JSON object only — no explanation, no 
 If no fallacy is detected, respond with exactly: null"""
 
 
-def parse_response(raw: str) -> FallacyResult | None:
+def parse_response(raw: str, transcript: str) -> FallacyResult | None:
     raw = raw.strip()
     if raw.lower() == "null" or not raw:
         return None
     try:
         data = json.loads(raw)
+        trigger = data["trigger_phrase"]
+        if trigger.lower() not in transcript.lower():
+            return None
         return FallacyResult(
             name=data["fallacy"],
             confidence=float(data["confidence"]),
-            trigger_phrase=data["trigger_phrase"],
+            trigger_phrase=trigger,
         )
     except (json.JSONDecodeError, KeyError, ValueError):
         return None
