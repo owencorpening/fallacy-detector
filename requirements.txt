@@ -1,0 +1,7 @@
+anthropic
+faster-whisper
+sounddevice
+numpy
+pyyaml
+yt-dlp
+pytest
