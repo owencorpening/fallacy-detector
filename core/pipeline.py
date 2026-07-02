@@ -13,6 +13,13 @@ def _err(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
 
 
+def _dot_progress(label: str, stop: threading.Event) -> None:
+    print(label, end="", file=sys.stderr, flush=True)
+    while not stop.wait(3.0):
+        print(".", end="", file=sys.stderr, flush=True)
+    print("", file=sys.stderr)
+
+
 class Pipeline:
     def __init__(
         self,
@@ -37,6 +44,48 @@ class Pipeline:
             if transcript:
                 _err(f"  > {transcript}")
                 threading.Thread(target=self._classify, args=(transcript,), daemon=True).start()
+
+    def run_batch(self) -> None:
+        chunks: list[str] = []
+        stop = threading.Event()
+        t = threading.Thread(target=_dot_progress, args=("Transcribing", stop), daemon=True)
+        t.start()
+        try:
+            for chunk in self._source.chunks():
+                transcript = self._stt.transcribe(chunk)
+                if transcript:
+                    chunks.append(transcript)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            stop.set()
+            t.join()
+
+        if not chunks:
+            _err("No speech detected.")
+            return
+
+        full = " ".join(chunks)
+        stop2 = threading.Event()
+        t2 = threading.Thread(target=_dot_progress, args=("Analyzing", stop2), daemon=True)
+        t2.start()
+        try:
+            results = self._llm.classify_all(full)
+        except Exception as e:
+            stop2.set()
+            t2.join()
+            _err(f"Error: {e}")
+            return
+        finally:
+            stop2.set()
+            t2.join()
+
+        seen: set[str] = set()
+        for result in results:
+            key = f"{result.name}:{result.trigger_phrase.lower()}"
+            if key not in seen:
+                seen.add(key)
+                print(str(result), flush=True)
 
     def _classify(self, transcript: str) -> None:
         t0 = time.monotonic()

@@ -100,6 +100,7 @@ def main() -> None:
     parser.add_argument("--source", choices=["file", "stream", "youtube", "mic"], default="mic")
     parser.add_argument("--file", help="Path to audio file (with --source file)")
     parser.add_argument("--url", help="URL for --source stream or youtube")
+    parser.add_argument("--realtime", action="store_true", help="Classify each chunk as it arrives instead of waiting for the full transcript")
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -118,7 +119,10 @@ def main() -> None:
     )
 
     try:
-        pipeline.run()
+        if args.realtime:
+            pipeline.run()
+        else:
+            pipeline.run_batch()
     except KeyboardInterrupt:
         print("\nStopped.")
 
