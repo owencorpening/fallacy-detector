@@ -3,11 +3,17 @@ stt:
   model_size: tiny   # tiny | base | small | medium | large
 
 llm:
-  provider: ollama
-  model: llama3.2
-  base_url: http://localhost:11434
+  default: ollama
+
+  ollama:
+    model: llama3.2
+    base_url: http://localhost:11434
+
+  anthropic:
+    model: claude-haiku-4-5-20251001
+    api_key: ${ANTHROPIC_API_KEY}
 
 pipeline:
-  chunk_seconds: 5
+  chunk_seconds: 15
   context_window: 3   # number of previous chunks included in LLM context
   sample_rate: 16000

@@ -37,8 +37,7 @@ def build_stt(cfg: dict):
         sys.exit(1)
 
 
-def build_llm(cfg: dict):
-    provider = cfg.get("provider", "anthropic")
+def build_llm(provider: str, cfg: dict):
     if provider == "anthropic":
         from adapters.llm.anthropic_adapter import AnthropicAdapter
         return AnthropicAdapter(
@@ -101,13 +100,17 @@ def main() -> None:
     parser.add_argument("--file", help="Path to audio file (with --source file)")
     parser.add_argument("--url", help="URL for --source stream or youtube")
     parser.add_argument("--realtime", action="store_true", help="Classify each chunk as it arrives instead of waiting for the full transcript")
+    parser.add_argument("--llm", help="LLM profile to use, e.g. ollama or anthropic (overrides config default)")
     args = parser.parse_args()
 
     config = load_config(args.config)
     pipeline_cfg = config.get("pipeline", {})
+    llm_cfg = config.get("llm", {})
+    provider = args.llm or llm_cfg.get("default", "ollama")
+    profile = llm_cfg.get(provider, {})
 
     stt = build_stt(config.get("stt", {}))
-    llm = build_llm(config.get("llm", {}))
+    llm = build_llm(provider, profile)
     source = build_source(args, pipeline_cfg)
 
     from core.pipeline import Pipeline
